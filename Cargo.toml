@@ -3,3 +3,8 @@
 name = "user-agent"
 version = "0.0.1"
 authors = ["Ivan Ivaschenko <defuz@me.com>"]
+
+
+[dependencies]
+regex           = "*"
+regex_macros    = "*"

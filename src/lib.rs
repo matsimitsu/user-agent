@@ -1,11 +1,8 @@
-#![feature(phase)]
-#[phase(plugin)]
-extern crate regex_macros;
+#![feature(plugin)]
+#![plugin(regex_macros)]
 extern crate regex;
 
-extern crate core;
-use std::fmt;
-
+#[derive(Debug)]
 pub struct Browser {
     name: String,
     version: Option<String>
@@ -17,27 +14,13 @@ impl PartialEq for Browser {
      }
  }
 
-impl fmt::Show for Browser {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}/{}", self.name, self.version)
-    }
-}
 
-
+#[derive(Debug)]
 pub struct UserAgent {
     browser: Option<Browser>,
     platform: Option<String>,
     language: Option<String>
 }
-
-impl fmt::Show for UserAgent {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f,
-               "{} {}/{}",
-               self.browser, self.platform, self.language)
-    }
-}
-
 
 struct BrowserParser {
     name: &'static str,
@@ -50,7 +33,7 @@ struct PlatformParser {
 }
 
 
-static BROWSER_VERSION_RE_ARRAY: [BrowserParser, ..19] = [
+static BROWSER_VERSION_RE_ARRAY: [BrowserParser; 19] = [
     BrowserParser {name: "google", re: regex!(r"(?i:(?:googlebot)[/\sa-z(]*(\d+[.\da-z]+)?)")},
     BrowserParser {name: "msn", re: regex!(r"(?i:(?:msnbot)[/\sa-z(]*(\d+[.\da-z]+)?)")},
     BrowserParser {name: "yahoo", re: regex!(r"(?i:(?:yahoo)[/\sa-z(]*(\d+[.\da-z]+)?)")},
@@ -71,7 +54,7 @@ static BROWSER_VERSION_RE_ARRAY: [BrowserParser, ..19] = [
     BrowserParser {name: "links", re: regex!(r"(?i:(?:links)[/\sa-z(]*(\d+[.\da-z]+)?)")},
     BrowserParser {name: "seamonkey", re: regex!(r"(?i:(?:seamonkey|mozilla)[/\sa-z(]*(\d+[.\da-z]+)?)")},
 ];
-static PLATFORM_RE_ARRAY: [PlatformParser, ..16] = [
+static PLATFORM_RE_ARRAY: [PlatformParser; 16] = [
     PlatformParser {name: "chromeos", re: regex!("(?i:cros)")},
     PlatformParser {name: "iphone", re: regex!("(?i:iphone|ios)")},
     PlatformParser {name: "ipad", re: regex!("(?i:ipad)")},
@@ -98,7 +81,8 @@ pub fn parse_browser(string: &str) -> Option<Browser> {
             return Some(Browser {
                 name: browser.name.to_string(),
                 version: match captures.unwrap().at(1) {
-                    "" => None, x => Some(x.to_string())
+                    Some(s) => Some(s.to_string()),
+                    None    => None
                 }
             });
         }
@@ -118,8 +102,13 @@ pub fn parse_platform(string: &str) -> Option<String> {
 pub fn parse_language(string: &str) -> Option<String> {
     return match LANGUAGE_RE.captures(string) {
         Some(captures) => match captures.at(1) {
-            "" => Some(captures.at(2).to_string()),
-            x => Some(x.to_string())
+            None => {
+                match captures.at(2) {
+                    Some(x) => Some(x.to_string()),
+                    None => None
+                }
+            },
+            Some(x) => Some(x.to_string())
         },
         None => None
     };
