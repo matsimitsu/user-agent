@@ -4,8 +4,8 @@ extern crate regex;
 
 #[derive(Debug)]
 pub struct Browser {
-    name: String,
-    version: Option<String>
+    pub name: String,
+    pub version: Option<String>
 }
 
 impl PartialEq for Browser {
@@ -17,9 +17,9 @@ impl PartialEq for Browser {
 
 #[derive(Debug)]
 pub struct UserAgent {
-    browser: Option<Browser>,
-    platform: Option<String>,
-    language: Option<String>
+    pub browser: Option<Browser>,
+    pub platform: Option<String>,
+    pub language: Option<String>
 }
 
 struct BrowserParser {
